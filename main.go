@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,11 +23,39 @@ func main() {
 	sourceBeaconNode := flag.String("source-beacon-node", "", fmt.Sprintf("Beacon node HTTP endpoint to source blocks from (defaults to -%s)", targetBeaconNodeFlag))
 	proofsPerBlock := flag.Int("proofs-per-block", 1, "Number of proof IDs to submit per block (max 8)")
 	proofDelayMs := flag.Int("proof-delay-ms", 1000, "Delay in milliseconds to simulate proof generation time")
+	metricsAddr := flag.String("metrics-addr", ":8080", "Address for the metrics/health HTTP server")
 
 	flag.Parse()
 
+	// Start health/metrics HTTP server
+	go startHealthServer(*metricsAddr)
+
 	if err := run(*targetBeaconNode, *sourceBeaconNode, *proofsPerBlock, *proofDelayMs); err != nil {
 		os.Exit(1)
+	}
+}
+
+func startHealthServer(addr string) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	server := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+
+	logger.Info("Starting health server", "addr", addr)
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Error("Health server error", "error", err)
 	}
 }
 

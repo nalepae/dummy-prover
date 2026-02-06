@@ -32,6 +32,12 @@ Or build from source:
 go build -o dummy-prover .
 ```
 
+Or build with Docker:
+
+```bash
+docker build -t dummy-prover:latest .
+```
+
 ## Usage
 
 ```bash
