@@ -46,7 +46,7 @@ func (p *Prover) generateAndSubmitDummyProofs(ctx context.Context, block *Signed
 	// Generate all proofs in parallel
 	var genGroup errgroup.Group
 
-	proofs := make([]*ExecutionProof, p.proofsPerBlock)
+	proofs := make([]*SignedExecutionProof, p.proofsPerBlock)
 	for proofType := range ProofType(p.proofsPerBlock) {
 		genGroup.Go(func() error {
 			proof, err := generateDummyProof(proofType, block)
@@ -77,7 +77,7 @@ func (p *Prover) generateAndSubmitDummyProofs(ctx context.Context, block *Signed
 
 	for proofType, proof := range proofs {
 		submitGroup.Go(func() error {
-			if err := p.target.SubmitExecutionProof(ctx, proof); err != nil {
+			if err := p.target.SubmitSignedExecutionProof(ctx, proof); err != nil {
 				return fmt.Errorf("submit proof %d: %w", proofType, err)
 			}
 
@@ -92,8 +92,8 @@ func (p *Prover) generateAndSubmitDummyProofs(ctx context.Context, block *Signed
 	return nil
 }
 
-// generateDummyProof creates a dummy proof with the standard format.
-func generateDummyProof(proofType ProofType, signedBlindedBeaconBlock *SignedBlindedBeaconBlock) (*ExecutionProof, error) {
+// generateDummyProof creates a dummy signed proof with the standard format.
+func generateDummyProof(proofType ProofType, signedBlindedBeaconBlock *SignedBlindedBeaconBlock) (*SignedExecutionProof, error) {
 	beaconBlock := signedBlindedBeaconBlock.Message
 	beaconBlockBody := beaconBlock.Body
 	ExecutionPayloadHeader := beaconBlockBody.ExecutionPayloadHeader
@@ -132,5 +132,11 @@ func generateDummyProof(proofType ProofType, signedBlindedBeaconBlock *SignedBli
 		PublicInput: publicInput,
 	}
 
-	return executionProof, nil
+	signedProof := &SignedExecutionProof{
+		Message:      executionProof,
+		ProverPubkey: make([]byte, 48), // 48 zero bytes (dummy)
+		Signature:    make([]byte, 96), // 96 zero bytes (dummy)
+	}
+
+	return signedProof, nil
 }

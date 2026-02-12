@@ -93,6 +93,12 @@ type (
 		PublicInput *PublicInput `json:"public_input"`
 	}
 
+	SignedExecutionProof struct {
+		Message      *ExecutionProof `json:"message"`
+		ProverPubkey []byte          `json:"prover_pubkey"` // 48 bytes
+		Signature    []byte          `json:"signature"`     // 96 bytes
+	}
+
 	PublicInput struct {
 		NewPayloadRequestRoot []byte `json:"new_payload_request_root,omitempty"`
 	}

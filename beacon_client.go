@@ -167,8 +167,8 @@ func (c *BeaconClient) GetSignedBlindedBeaconBlock(ctx context.Context, blockID 
 	return response.Data, nil
 }
 
-// SubmitExecutionProof submits an execution proof to the beacon node pool.
-func (c *BeaconClient) SubmitExecutionProof(ctx context.Context, proof *ExecutionProof) error {
+// SubmitSignedExecutionProof submits a signed execution proof to the beacon node pool.
+func (c *BeaconClient) SubmitSignedExecutionProof(ctx context.Context, proof *SignedExecutionProof) error {
 	url := c.baseURL + "/eth/v1/prover/execution_proofs"
 
 	body, err := json.Marshal(proof)
