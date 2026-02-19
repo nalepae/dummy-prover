@@ -21,7 +21,7 @@ const targetBeaconNodeFlag = "target-beacon-node"
 func main() {
 	targetBeaconNode := flag.String(targetBeaconNodeFlag, "http://localhost:3500", "Beacon node HTTP endpoint to submit proofs to")
 	sourceBeaconNode := flag.String("source-beacon-node", "", fmt.Sprintf("Beacon node HTTP endpoint to source blocks from (defaults to -%s)", targetBeaconNodeFlag))
-	proofsPerBlock := flag.Int("proofs-per-block", 1, "Number of proof IDs to submit per block (max 8)")
+	proofsPerBlock := flag.Int("proofs-per-block", 2, "Number of proof IDs to submit per block (max 8)")
 	proofDelayMs := flag.Int("proof-delay-ms", 1000, "Delay in milliseconds to simulate proof generation time")
 	metricsAddr := flag.String("metrics-addr", ":8080", "Address for the metrics/health HTTP server")
 

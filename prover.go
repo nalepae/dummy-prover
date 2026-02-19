@@ -37,7 +37,13 @@ func (p *Prover) handleBlockGossip(ctx context.Context, event BlockEventData) er
 		return fmt.Errorf("generate and submit dummy proofs: %w", err)
 	}
 
-	logger.Info("Submitted dummy proofs", "blockRoot", fmt.Sprintf("%#x", event.Block), "slot", event.Slot)
+	logger.Info(
+		"Submitted dummy proofs",
+		"blockRoot", fmt.Sprintf("%#x", event.Block),
+		"slot", event.Slot,
+		"count", p.proofsPerBlock,
+	)
+
 	return nil
 }
 
