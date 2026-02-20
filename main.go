@@ -21,6 +21,7 @@ const targetBeaconNodeFlag = "target-beacon-node"
 func main() {
 	targetBeaconNode := flag.String(targetBeaconNodeFlag, "http://localhost:3500", "Beacon node HTTP endpoint to submit proofs to")
 	sourceBeaconNode := flag.String("source-beacon-node", "", fmt.Sprintf("Beacon node HTTP endpoint to source blocks from (defaults to -%s)", targetBeaconNodeFlag))
+	validatorClientURL := flag.String("validator-client", "http://localhost:7500", "Validator client HTTP endpoint for signing proofs")
 	proofsPerBlock := flag.Int("proofs-per-block", 2, "Number of proof IDs to submit per block (max 8)")
 	proofDelayMs := flag.Int("proof-delay-ms", 1000, "Delay in milliseconds to simulate proof generation time")
 	metricsAddr := flag.String("metrics-addr", ":8080", "Address for the metrics/health HTTP server")
@@ -30,7 +31,7 @@ func main() {
 	// Start health/metrics HTTP server
 	go startHealthServer(*metricsAddr)
 
-	if err := run(*targetBeaconNode, *sourceBeaconNode, *proofsPerBlock, *proofDelayMs); err != nil {
+	if err := run(*targetBeaconNode, *sourceBeaconNode, *validatorClientURL, *proofsPerBlock, *proofDelayMs); err != nil {
 		os.Exit(1)
 	}
 }
@@ -59,7 +60,7 @@ func startHealthServer(addr string) {
 	}
 }
 
-func run(targetBeaconNode string, sourceBeaconNode string, proofsPerBlock int, proofDelayMs int) error {
+func run(targetBeaconNode string, sourceBeaconNode string, validatorClientURL string, proofsPerBlock int, proofDelayMs int) error {
 	// Use beacon-node as source if not specified
 	sourceURL := sourceBeaconNode
 	if sourceURL == "" {
@@ -70,12 +71,16 @@ func run(targetBeaconNode string, sourceBeaconNode string, proofsPerBlock int, p
 	target := NewBeaconClient(targetBeaconNode)
 	source := NewBeaconClient(sourceURL)
 
+	// Create validator client for signing
+	validatorClient := NewValidatorClient(validatorClientURL)
+
 	// Create prover
-	prover := NewProver(source, target, proofsPerBlock, time.Duration(proofDelayMs)*time.Millisecond)
+	prover := NewProver(source, target, validatorClient, proofsPerBlock, time.Duration(proofDelayMs)*time.Millisecond)
 
 	logger.Info("Starting dummy prover",
 		"source", sourceURL,
 		"target", targetBeaconNode,
+		"validatorClient", validatorClientURL,
 		"proofsPerBlock", proofsPerBlock,
 		"proofDelayMs", proofDelayMs,
 	)

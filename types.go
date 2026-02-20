@@ -99,6 +99,16 @@ type (
 		Signature      []byte          `json:"signature"` // 96 bytes
 	}
 
+	// ExecutionProofRequest is the request body for signing an execution proof.
+	ExecutionProofRequest struct {
+		Data *ExecutionProof `json:"data"`
+	}
+
+	// SignedExecutionProofResponse is the response from signing an execution proof.
+	SignedExecutionProofResponse struct {
+		Data *SignedExecutionProof `json:"data"`
+	}
+
 	PublicInput struct {
 		NewPayloadRequestRoot []byte `json:"new_payload_request_root,omitempty"`
 	}

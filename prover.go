@@ -10,19 +10,21 @@ import (
 
 // Prover handles proof generation and submission.
 type Prover struct {
-	source         *BeaconClient
-	target         *BeaconClient
-	proofsPerBlock int
-	proofDelay     time.Duration
+	source          *BeaconClient
+	target          *BeaconClient
+	validatorClient *ValidatorClient
+	proofsPerBlock  int
+	proofDelay      time.Duration
 }
 
 // NewProver creates a new Prover instance.
-func NewProver(source *BeaconClient, target *BeaconClient, proofsPerBlock int, proofDelay time.Duration) *Prover {
+func NewProver(source *BeaconClient, target *BeaconClient, validatorClient *ValidatorClient, proofsPerBlock int, proofDelay time.Duration) *Prover {
 	return &Prover{
-		source:         source,
-		target:         target,
-		proofsPerBlock: proofsPerBlock,
-		proofDelay:     proofDelay,
+		source:          source,
+		target:          target,
+		validatorClient: validatorClient,
+		proofsPerBlock:  proofsPerBlock,
+		proofDelay:      proofDelay,
 	}
 }
 
@@ -55,9 +57,9 @@ func (p *Prover) generateAndSubmitDummyProofs(ctx context.Context, block *Signed
 	proofs := make([]*SignedExecutionProof, p.proofsPerBlock)
 	for proofType := range ProofType(p.proofsPerBlock) {
 		genGroup.Go(func() error {
-			proof, err := generateDummyProof(proofType, block)
+			proof, err := p.generateProof(ctx, proofType, block)
 			if err != nil {
-				return fmt.Errorf("generate dummy proof %d: %w", proofType, err)
+				return fmt.Errorf("generate proof %d: %w", proofType, err)
 			}
 
 			proofs[proofType] = proof
@@ -98,8 +100,8 @@ func (p *Prover) generateAndSubmitDummyProofs(ctx context.Context, block *Signed
 	return nil
 }
 
-// generateDummyProof creates a dummy signed proof with the standard format.
-func generateDummyProof(proofType ProofType, signedBlindedBeaconBlock *SignedBlindedBeaconBlock) (*SignedExecutionProof, error) {
+// generateProof creates an execution proof and signs it using the validator client.
+func (p *Prover) generateProof(ctx context.Context, proofType ProofType, signedBlindedBeaconBlock *SignedBlindedBeaconBlock) (*SignedExecutionProof, error) {
 	beaconBlock := signedBlindedBeaconBlock.Message
 	beaconBlockBody := beaconBlock.Body
 	ExecutionPayloadHeader := beaconBlockBody.ExecutionPayloadHeader
@@ -138,10 +140,10 @@ func generateDummyProof(proofType ProofType, signedBlindedBeaconBlock *SignedBli
 		PublicInput: publicInput,
 	}
 
-	signedProof := &SignedExecutionProof{
-		Message:        executionProof,
-		ValidatorIndex: 0,                // dummy validator index
-		Signature:      make([]byte, 96), // 96 zero bytes (dummy)
+	// Sign the proof using the validator client
+	signedProof, err := p.validatorClient.SignExecutionProof(ctx, executionProof)
+	if err != nil {
+		return nil, fmt.Errorf("sign execution proof: %w", err)
 	}
 
 	return signedProof, nil
