@@ -38,6 +38,10 @@ Or build with Docker:
 docker build -t dummy-prover:latest .
 ```
 
+## Flow
+<img width="1311" height="928" alt="image" src="https://github.com/user-attachments/assets/d6a85741-1869-4696-b896-ca388508e8e7" />
+
+
 ## Usage
 
 ```bash
