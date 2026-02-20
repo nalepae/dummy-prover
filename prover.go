@@ -139,9 +139,9 @@ func generateDummyProof(proofType ProofType, signedBlindedBeaconBlock *SignedBli
 	}
 
 	signedProof := &SignedExecutionProof{
-		Message:      executionProof,
-		ProverPubkey: make([]byte, 48), // 48 zero bytes (dummy)
-		Signature:    make([]byte, 96), // 96 zero bytes (dummy)
+		Message:        executionProof,
+		ValidatorIndex: 0,                // dummy validator index
+		Signature:      make([]byte, 96), // 96 zero bytes (dummy)
 	}
 
 	return signedProof, nil

@@ -94,9 +94,9 @@ type (
 	}
 
 	SignedExecutionProof struct {
-		Message      *ExecutionProof `json:"message"`
-		ProverPubkey []byte          `json:"prover_pubkey"` // 48 bytes
-		Signature    []byte          `json:"signature"`     // 96 bytes
+		Message        *ExecutionProof `json:"message"`
+		ValidatorIndex uint64          `json:"validator_index"`
+		Signature      []byte          `json:"signature"` // 96 bytes
 	}
 
 	PublicInput struct {
