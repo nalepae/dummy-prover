@@ -50,25 +50,29 @@ dummy-prover [flags]
 |------|---------|-------------|
 | `-target-beacon-node` | `http://localhost:3500` | Beacon node HTTP endpoint to submit proofs to |
 | `-source-beacon-node` | (same as target) | Beacon node HTTP endpoint to source blocks from |
-| `-proofs-per-block` | `1` | Number of proof IDs to submit per block (max 8) |
+| `-validator-client` | `http://localhost:7500` | Validator client HTTP endpoint for signing proofs |
+| `-proofs-per-block` | `2` | Number of proof IDs to submit per block (max 8) |
 | `-proof-delay-ms` | `1000` | Delay in milliseconds to simulate proof generation time |
+| `-metrics-addr` | `:8080` | Address for the metrics/health HTTP server |
 
 ### Example
 
 ```bash
-dummy-prover -source-beacon-node http://0.0.0.0:34177 -target-beacon-node http://0.0.0.0:34177 -proofs-per-block 4 -proof-delay-ms 500
+dummy-prover -target-beacon-node http://cl-2-prysm-geth:3500 -validator-client http://vc-2-geth-prysm:5056
 
-Feb  6 18:07:35.071 INF Starting dummy prover source=http://0.0.0.0:34177 target=http://0.0.0.0:34177 proofsPerBlock=1 proofDelayMs=1000
-Feb  6 18:07:35.077 INF Connected to SSE stream event=block url="http://0.0.0.0:34177/eth/v1/events?topics=block"
-Feb  6 18:07:37.177 INF Submitted dummy proofs blockRoot=0xdb10ce488d3e52c9385641b7324e896050eaf932e75724dc9bd85a4e4b1f6e7e slot=1256
-Feb  6 18:07:41.196 INF Submitted dummy proofs blockRoot=0x79e3b83e30f50c91940699a3b41d9b39001cc38449119ea25ef5bfde71de1bd7 slot=1257
-Feb  6 18:07:45.182 INF Submitted dummy proofs blockRoot=0x139b83f569d7036c74d2e64f8aacf32eeaaa1f2dd17a079bee987f8a959e931b slot=1258
-Feb  6 18:07:49.184 INF Submitted dummy proofs blockRoot=0xba052cccea64caa3e90b87407e42f3a2b2a6da4a5db462dd50f3cf61d569617c slot=1259
-Feb  6 18:07:53.181 INF Submitted dummy proofs blockRoot=0x327a0afa70e7b83913069ac93d6da9aa39fab23028ed0d45775afa6edff760f3 slot=1260
-Feb  6 18:07:57.176 INF Submitted dummy proofs blockRoot=0x69bb7622e1d4ee593a2ce9c7b8afe1fa7e8efd15a2fc1afc02e3471c3d7d516b slot=1261
-Feb  6 18:08:01.172 INF Submitted dummy proofs blockRoot=0x24e2e63419587eef9174e4d07bcb3ccf01992b5e7b3723767ca2328fa1e086a8 slot=1262
-Feb  6 18:08:05.186 INF Submitted dummy proofs blockRoot=0xcef0cc3455e0334528fe17744b683c5ffc790b87cb2eaf07c2ddd30fffa761d8 slot=1263
-Feb  6 18:08:09.159 INF Submitted dummy proofs blockRoot=0x82b3f3778fffaaed63c0d295d2241a5430e5812387fec79e245e259e8ed9fc17 slot=1264
+Feb 20 14:26:01.493 INF Starting dummy prover source=http://cl-2-prysm-geth:3500 target=http://cl-2-prysm-geth:3500 validatorClient=http://vc-2-geth-prysm:5056 proofsPerBlock=2 proofDelayMs=1000
+Feb 20 14:26:01.493 INF Starting health server addr=:8080
+Feb 20 14:26:01.494 INF Connected to SSE stream event=block url="http://cl-2-prysm-geth:3500/eth/v1/events?topics=block"
+Feb 20 14:26:28.234 INF Submitted dummy proofs blockRoot=0x94d9283bec01c07cc9778dab6e9f40bb93174f5f7807f415ee9cb4cd16e4dd59 slot=1 count=2
+Feb 20 14:26:32.192 INF Submitted dummy proofs blockRoot=0x10aa190a0988e972881ed8577c9c25908b476ec77cd98c1b7b0c3c46a03b73ea slot=2 count=2
+Feb 20 14:26:36.177 INF Submitted dummy proofs blockRoot=0x3457d2d4437d9a755ef862166739f7c6e502ffeb7dedbf17eec0af9ca58e4ca9 slot=3 count=2
+Feb 20 14:26:40.193 INF Submitted dummy proofs blockRoot=0xe5e04f6bb879e8280fa0ea095c844566489d24ca201a3b32bf19f4dfb33b98a1 slot=4 count=2
+Feb 20 14:26:44.180 INF Submitted dummy proofs blockRoot=0x23d993b195fe9e635a4023a2906d29fab28f921aa61326d6add3e3a134594dbe slot=5 count=2
+Feb 20 14:26:48.182 INF Submitted dummy proofs blockRoot=0xcf5db56d0dba64b5af8aa589f561717e93aa203525d86606a4faaf8a9472b0bd slot=6 count=2
+Feb 20 14:26:52.232 INF Submitted dummy proofs blockRoot=0x79a322295b123ccc7c8f80962f16f678a8949372d0523f616bde7b93acadfbd2 slot=7 count=2
+Feb 20 14:26:56.230 INF Submitted dummy proofs blockRoot=0x3c4505727352be8772f63ed505d8e587b464e5fdddc46955cc4986af4ec5e413 slot=8 count=2
+Feb 20 14:27:00.183 INF Submitted dummy proofs blockRoot=0xd1900400c1f307c5c0cdc357ca1a6e08b184d56f23a0d13ddbe99a4de49faa39 slot=9 count=2
+Feb 20 14:27:04.181 INF Submitted dummy proofs blockRoot=0x8719143ab9ea4103db756504330974de2c894b4b5a9027919dada8010052fa8c slot=10 count=2
 
 Feb  6 18:08:10.023 INF Shutdown requested signal=interrupt
 ```
