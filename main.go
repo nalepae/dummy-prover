@@ -24,6 +24,7 @@ func main() {
 	validatorClientURL := flag.String("validator-client", "http://localhost:7500", "Validator client HTTP endpoint for signing proofs")
 	proofsPerBlock := flag.Int("proofs-per-block", 2, "Number of proof IDs to submit per block (max 8)")
 	proofDelayMs := flag.Int("proof-delay-ms", 1000, "Delay in milliseconds to simulate proof generation time")
+	proofDelayJitterMs := flag.Int("proof-delay-jitter-ms", 0, "Random jitter in milliseconds added to proof delay (±)")
 	metricsAddr := flag.String("metrics-addr", ":8080", "Address for the metrics/health HTTP server")
 
 	flag.Parse()
@@ -31,7 +32,16 @@ func main() {
 	// Start health/metrics HTTP server
 	go startHealthServer(*metricsAddr)
 
-	if err := run(*targetBeaconNode, *sourceBeaconNode, *validatorClientURL, *proofsPerBlock, *proofDelayMs); err != nil {
+	cfg := Config{
+		TargetBeaconNode:   *targetBeaconNode,
+		SourceBeaconNode:   *sourceBeaconNode,
+		ValidatorClientURL: *validatorClientURL,
+		ProofsPerBlock:     *proofsPerBlock,
+		ProofDelayMs:       *proofDelayMs,
+		ProofDelayJitterMs: *proofDelayJitterMs,
+	}
+
+	if err := run(cfg); err != nil {
 		os.Exit(1)
 	}
 }
@@ -60,29 +70,40 @@ func startHealthServer(addr string) {
 	}
 }
 
-func run(targetBeaconNode string, sourceBeaconNode string, validatorClientURL string, proofsPerBlock int, proofDelayMs int) error {
+// Config holds the configuration for the dummy prover.
+type Config struct {
+	TargetBeaconNode   string
+	SourceBeaconNode   string
+	ValidatorClientURL string
+	ProofsPerBlock     int
+	ProofDelayMs       int
+	ProofDelayJitterMs int
+}
+
+func run(cfg Config) error {
 	// Use beacon-node as source if not specified
-	sourceURL := sourceBeaconNode
+	sourceURL := cfg.SourceBeaconNode
 	if sourceURL == "" {
-		sourceURL = targetBeaconNode
+		sourceURL = cfg.TargetBeaconNode
 	}
 
 	// Create beacon clients
-	target := NewBeaconClient(targetBeaconNode)
+	target := NewBeaconClient(cfg.TargetBeaconNode)
 	source := NewBeaconClient(sourceURL)
 
 	// Create validator client for signing
-	validatorClient := NewValidatorClient(validatorClientURL)
+	validatorClient := NewValidatorClient(cfg.ValidatorClientURL)
 
 	// Create prover
-	prover := NewProver(source, target, validatorClient, proofsPerBlock, time.Duration(proofDelayMs)*time.Millisecond)
+	prover := NewProver(source, target, validatorClient, cfg.ProofsPerBlock, time.Duration(cfg.ProofDelayMs)*time.Millisecond, time.Duration(cfg.ProofDelayJitterMs)*time.Millisecond)
 
 	logger.Info("Starting dummy prover",
 		"source", sourceURL,
-		"target", targetBeaconNode,
-		"validatorClient", validatorClientURL,
-		"proofsPerBlock", proofsPerBlock,
-		"proofDelayMs", proofDelayMs,
+		"target", cfg.TargetBeaconNode,
+		"validatorClient", cfg.ValidatorClientURL,
+		"proofsPerBlock", cfg.ProofsPerBlock,
+		"proofDelayMs", cfg.ProofDelayMs,
+		"proofDelayJitterMs", cfg.ProofDelayJitterMs,
 	)
 
 	// Set up context with cancellation

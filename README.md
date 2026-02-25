@@ -57,6 +57,7 @@ dummy-prover [flags]
 | `-validator-client` | `http://localhost:7500` | Validator client HTTP endpoint for signing proofs |
 | `-proofs-per-block` | `2` | Number of proof IDs to submit per block (max 8) |
 | `-proof-delay-ms` | `1000` | Delay in milliseconds to simulate proof generation time |
+| `-proof-delay-jitter-ms` | `0` | Random jitter in milliseconds added to proof delay (±) |
 | `-metrics-addr` | `:8080` | Address for the metrics/health HTTP server |
 
 ### Example
@@ -64,7 +65,7 @@ dummy-prover [flags]
 ```bash
 dummy-prover -target-beacon-node http://cl-2-prysm-geth:3500 -validator-client http://vc-2-geth-prysm:5056
 
-Feb 20 14:26:01.493 INF Starting dummy prover source=http://cl-2-prysm-geth:3500 target=http://cl-2-prysm-geth:3500 validatorClient=http://vc-2-geth-prysm:5056 proofsPerBlock=2 proofDelayMs=1000
+Feb 20 14:26:01.493 INF Starting dummy prover source=http://cl-2-prysm-geth:3500 target=http://cl-2-prysm-geth:3500 validatorClient=http://vc-2-geth-prysm:5056 proofsPerBlock=2 proofDelayMs=1000 proofDelayJitterMs=0
 Feb 20 14:26:01.493 INF Starting health server addr=:8080
 Feb 20 14:26:01.494 INF Connected to SSE stream event=block url="http://cl-2-prysm-geth:3500/eth/v1/events?topics=block"
 Feb 20 14:26:28.234 INF Submitted dummy proofs blockRoot=0x94d9283bec01c07cc9778dab6e9f40bb93174f5f7807f415ee9cb4cd16e4dd59 slot=1 count=2

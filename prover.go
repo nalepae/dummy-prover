@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand/v2"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -10,21 +11,23 @@ import (
 
 // Prover handles proof generation and submission.
 type Prover struct {
-	source          *BeaconClient
-	target          *BeaconClient
-	validatorClient *ValidatorClient
-	proofsPerBlock  int
-	proofDelay      time.Duration
+	source           *BeaconClient
+	target           *BeaconClient
+	validatorClient  *ValidatorClient
+	proofsPerBlock   int
+	proofDelay       time.Duration
+	proofDelayJitter time.Duration
 }
 
 // NewProver creates a new Prover instance.
-func NewProver(source *BeaconClient, target *BeaconClient, validatorClient *ValidatorClient, proofsPerBlock int, proofDelay time.Duration) *Prover {
+func NewProver(source *BeaconClient, target *BeaconClient, validatorClient *ValidatorClient, proofsPerBlock int, proofDelay time.Duration, proofDelayJitter time.Duration) *Prover {
 	return &Prover{
-		source:          source,
-		target:          target,
-		validatorClient: validatorClient,
-		proofsPerBlock:  proofsPerBlock,
-		proofDelay:      proofDelay,
+		source:           source,
+		target:           target,
+		validatorClient:  validatorClient,
+		proofsPerBlock:   proofsPerBlock,
+		proofDelay:       proofDelay,
+		proofDelayJitter: proofDelayJitter,
 	}
 }
 
@@ -72,9 +75,17 @@ func (p *Prover) generateAndSubmitDummyProofs(ctx context.Context, block *Signed
 	}
 
 	// Simulate proof generation delay (wait once for all proofs)
-	if p.proofDelay > 0 {
+	delay := p.proofDelay
+	if p.proofDelayJitter > 0 {
+		jitter := time.Duration(rand.Int64N(int64(2*p.proofDelayJitter)+1)) - p.proofDelayJitter
+		delay += jitter
+		if delay < 0 {
+			delay = 0
+		}
+	}
+	if delay > 0 {
 		select {
-		case <-time.After(p.proofDelay):
+		case <-time.After(delay):
 		case <-ctx.Done():
 			return ctx.Err()
 		}
